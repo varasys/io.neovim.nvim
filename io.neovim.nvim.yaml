@@ -9,11 +9,6 @@ command: nvim
 # rename-desktop-file: nvim.desktop
 # rename-icon: nvim
 
-build-options:
-  - cflags: -l 2.5
-  - cxxflags: -l 2.5
-
-
 finish-args:
   # Edit anything
   - --filesystem=host
@@ -24,13 +19,13 @@ finish-args:
   - --socket=fallback-x11
   - --share=ipc
 
-post-install:
-  - npm -g install neovim standard yarn
-
 modules:
   - name: entr
-    make-args:
-      - all
+    buildsystem: simple
+    build-commands:
+      - ./configure
+      - make
+      - PREFIX=/app make install
     sources:
       - type: archive
         url: https://github.com/eradman/entr/archive/4.7.tar.gz
@@ -55,6 +50,12 @@ modules:
         sha256: 4de9ef9631daa85971420d1f5912296ec58105d0a95057720a7c008217e9e827
 
   - name: nodejs
+    sources:
+      - type: archive
+        url: https://nodejs.org/dist/latest-v14.x/node-v14.15.4.tar.xz
+        sha256: adb7ecf66c74b52a14a08cc22bb0f9aedc157cac1ac93240f7f455e8c8edec9c
+    # post-install:
+    #   - npm -g install neovim standard yarn
     cleanup:
         - /include
         - /share
@@ -63,7 +64,12 @@ modules:
         - /app/lib/node_modules/npm/html
         - /app/lib/node_modules/npm/man
         - /app/lib/node_modules/npm/scripts
-    sources:
-      - type: archive
-        url: https://nodejs.org/dist/latest-v14.x/node-v14.15.4.tar.xz
-        sha256: adb7ecf66c74b52a14a08cc22bb0f9aedc157cac1ac93240f7f455e8c8edec9c
+
+  - name: yarn
+    buildsystem: simple
+    build-options:
+      build-args:
+        - --share=network
+    build-commands:
+      - npm --global install yarn standard neovim
+...
